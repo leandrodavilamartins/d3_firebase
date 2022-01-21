@@ -44,7 +44,7 @@ function generateGraph(data){  // You have to create an array of objects first
     .selectAll('rect')
     .data(data)
     .join('rect')
-    .attr('x', (d) =>  x_scale(d.country))
+    .attr('x', (d) =>  x_scale(d.name))
     .attr('y', (d) => y_scale(d.value))
     .attr('width', x_scale.bandwidth())
     .attr('height', (d) => height - margin.bottom - y_scale(d.value))
