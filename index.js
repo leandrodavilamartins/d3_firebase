@@ -2,7 +2,14 @@ const country_data = [{country:[], value:[]}];
 const data =[]
 db.collection('countries').get().then(res => {
     res.docs.forEach(doc => {
-        console.log(doc.data())
+        //console.log(doc.data())
+        let res_object = doc.data()
+        for(const key in res_object) {
+            //console.log(key);
+            //console.log(res_object[key])
+            let country_object = {name: `${key}`, valor: `${res_object[key]}`}
+            console.log(country_object)
+        }
     })
     //generateGraph(data);
 }) 
