@@ -8,12 +8,14 @@ db.collection('countries').get().then(res => {
             //console.log(key);
             //console.log(res_object[key])
             let country_object = {name: `${key}`, value: `${res_object[key]}`}
-            console.log(country_object)
+            //console.log(country_object)
             data.push(country_object);
         }
     })
-    console.log(data);
-    generateGraph(data);
+    let sortedData = data.sort((a,b) => (parseFloat(a.value) > parseFloat(b.value)) ? -1 : 1) // sort the data 
+    console.log(sortedData);
+    //console.log(data);
+    generateGraph(sortedData); // generates the chart 
 }) 
 
 function generateGraph(data){  // You have to create an array of objects first 
@@ -23,7 +25,7 @@ function generateGraph(data){  // You have to create an array of objects first
     //console.log(graph);
 
     //set dimensions 
-    const width = 500;
+    const width = 800;
     const height = 500;
 
     const margin = {top: 20, bottom: 20, left: 30, right: 30}
@@ -38,7 +40,12 @@ function generateGraph(data){  // You have to create an array of objects first
     const y_scale = d3.scaleLinear().range([height - margin.bottom, margin.top])
     
     x_scale.domain(data.map((d) => d.name));
-    y_scale.domain([0,d3.max(data, (d) => d.value)])
+    //d3.max expects an array of numbers, not of objects 
+    y_scale.domain([0,d3.max(data, d => parseFloat(d.value))]);
+
+    let x_axis = d3.axisBottom(x_scale)
+    let y_axis = d3.axisLeft(y_scale)
+
 
     graph
     .selectAll('rect')
@@ -48,5 +55,15 @@ function generateGraph(data){  // You have to create an array of objects first
     .attr('y', (d) => y_scale(d.value))
     .attr('width', x_scale.bandwidth())
     .attr('height', (d) => height - margin.bottom - y_scale(d.value))
+
+    graph
+    .append("g")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(x_axis)
+
+    graph
+    .append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(y_axis);
     
 }
