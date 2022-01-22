@@ -1,5 +1,30 @@
+const data = [];
 
-const data =[]
+db.collection('countries').onSnapshot( res => {
+    res.docChanges().forEach(change => {
+        const doc = {...change.doc.data(), id: change.doc.id};
+        console.log(doc);
+        console.log(change.type)
+
+        switch(change.type) {
+            case 'added':
+                data.push(doc);
+                break;
+            case 'modified': 
+                const index = data.findIndex(item => item.id == doc.id);
+                data[index] = doc;
+                break;
+            case 'removed':
+                data = data.filter(item => item.id !== doc.id)
+                break;
+            default:
+                break;
+        }
+    })
+    //update(data)
+})
+
+/* const data =[]
 db.collection('countries').get().then(res => {
     res.docs.forEach(doc => {
         //console.log(doc.data())
@@ -16,7 +41,7 @@ db.collection('countries').get().then(res => {
     console.log(sortedData);
     //console.log(data);
     generateGraph(sortedData); // generates the chart 
-}) 
+})  */
 
 function generateGraph(data){  // You have to create an array of objects first 
     //console.log(data[0]);
@@ -65,5 +90,36 @@ function generateGraph(data){  // You have to create an array of objects first
     .append("g")
     .attr("transform", `translate(${margin.left},0)`)
     .call(y_axis);
+    
+}
+
+function update(data){
+    // here comes everything that depends on the changing data 
+    x_scale.domain(data.map((d) => d.name));
+    //d3.max expects an array of numbers, not of objects 
+    y_scale.domain([0,d3.max(data, d => parseFloat(d.value))]);
+
+    graph
+    .selectAll('rect')
+    .data(data)
+
+    graph.exit().remove()
+
+    graph
+    .join('rect')
+    .attr('x', (d) =>  x_scale(d.name))
+    .attr('y', (d) => y_scale(d.value))
+    .attr('width', x_scale.bandwidth())
+    .attr('height', (d) => height - margin.bottom - y_scale(d.value))
+
+    graph
+    .append("g")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(x_axis)
+
+    graph
+    .append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(y_axis)
     
 }
