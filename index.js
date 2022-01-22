@@ -1,10 +1,32 @@
+const graph = d3.select('#graph')
+//console.log(graph);
+
+//set dimensions 
+const width = 800;
+const height = 500;
+
+const margin = {top: 20, bottom: 20, left: 30, right: 30}
+
+//set svg 
+graph
+.attr('width', width)
+.attr('height', height)
+
+//set scales
+const x_scale = d3.scaleBand().range([margin.left,width - margin.right]).padding(0.1)
+const y_scale = d3.scaleLinear().range([height - margin.bottom, margin.top])
+//d3.max expects an array of numbers, not of objects 
+
+
+
+
 const data = [];
 
 db.collection('countries').onSnapshot( res => {
     res.docChanges().forEach(change => {
         const doc = {...change.doc.data(), id: change.doc.id};
         console.log(doc);
-        console.log(change.type)
+        //console.log(change.type)
 
         switch(change.type) {
             case 'added':
@@ -21,7 +43,7 @@ db.collection('countries').onSnapshot( res => {
                 break;
         }
     })
-    //update(data)
+    update(data)
 })
 
 /* const data =[]
@@ -43,74 +65,39 @@ db.collection('countries').get().then(res => {
     generateGraph(sortedData); // generates the chart 
 })  */
 
-function generateGraph(data){  // You have to create an array of objects first 
-    //console.log(data[0]);
 
-    const graph = d3.select('#graph')
-    //console.log(graph);
 
-    //set dimensions 
-    const width = 800;
-    const height = 500;
-
-    const margin = {top: 20, bottom: 20, left: 30, right: 30}
-
-    //set svg 
-    graph
-    .attr('width', width)
-    .attr('height', height)
-
-    //set scales
-    const x_scale = d3.scaleBand().range([margin.left,width - margin.right]).padding(0.1)
-    const y_scale = d3.scaleLinear().range([height - margin.bottom, margin.top])
-    
-    x_scale.domain(data.map((d) => d.name));
+function update(data){
+    // here comes everything that depends on the changing data 
+    x_scale.domain(data.map((d) => d.country));
     //d3.max expects an array of numbers, not of objects 
     y_scale.domain([0,d3.max(data, d => parseFloat(d.value))]);
 
     let x_axis = d3.axisBottom(x_scale)
     let y_axis = d3.axisLeft(y_scale)
 
-
-    graph
-    .selectAll('rect')
-    .data(data)
-    .join('rect')
-    .attr('x', (d) =>  x_scale(d.name))
-    .attr('y', (d) => y_scale(d.value))
-    .attr('width', x_scale.bandwidth())
-    .attr('height', (d) => height - margin.bottom - y_scale(d.value))
-
-    graph
-    .append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(x_axis)
-
-    graph
-    .append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(y_axis);
-    
-}
-
-function update(data){
-    // here comes everything that depends on the changing data 
-    x_scale.domain(data.map((d) => d.name));
-    //d3.max expects an array of numbers, not of objects 
-    y_scale.domain([0,d3.max(data, d => parseFloat(d.value))]);
-
-    graph
+    const rects = graph
     .selectAll('rect')
     .data(data)
 
-    graph.exit().remove()
+    rects.exit().remove()
 
-    graph
-    .join('rect')
-    .attr('x', (d) =>  x_scale(d.name))
-    .attr('y', (d) => y_scale(d.value))
+ /*    rects
+    .attr('width',x_scale.bandwidth)
+    .attr('height', d => height - margin.bottom - y_scale(d.value))
+    .style('fill', 'lime')
+    .attr('x', d => x_scale(d.country))
+    .attr('y', d => y_scale(d.value))  */
+ 
+    rects
+    .enter()
+    .append('rect')
+    .style('fill','orange')
+    .attr('x', (d) =>  x_scale(d.country))
+    .attr('y', (d) => y_scale(parseFloat(d.value)))
     .attr('width', x_scale.bandwidth())
-    .attr('height', (d) => height - margin.bottom - y_scale(d.value))
+    .attr('height', (d) => height - margin.bottom - y_scale(parseFloat(d.value)))
+
 
     graph
     .append("g")
