@@ -1,6 +1,6 @@
 //? CREATE THE MAIN SVG CONTAINER ELEMENT
-const svgWidth = 600
-const svgHeight = 600
+const svgWidth = 800
+const svgHeight = 700
 
 const svg = d3
   .select('.canvas')
@@ -88,6 +88,12 @@ const update = data => {
     .attr('transform', 'rotate(-40)')
     .attr('fill', 'orange')
     .attr('font-size', '1rem')
+
+  yAxisGroup
+  .selectAll('text')
+  .attr('text-anchor', 'end')
+  .attr('fill', 'orange') //  Temperature(y-axis) color
+  .attr('font-size', '1.0rem'); // Temperature(y-axis) font size
 }
 
 //
